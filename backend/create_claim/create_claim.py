@@ -4,8 +4,8 @@ import base64
 import json
 import uuid
 import datetime
-from functools import wraps
 from typing import List
+from auth_check import auth_check # this matches the deployed lambda path
 
 FILE_S3_BUCKET_NAME = os.environ.get('FILE_S3_BUCKET_NAME')
 FILE_METADATA_TABLE_NAME = os.environ.get('FILE_METADATA_TABLE_NAME')
@@ -13,37 +13,9 @@ FILE_METADATA_TABLE_NAME = os.environ.get('FILE_METADATA_TABLE_NAME')
 s3_client = boto3.client('s3')  
 dynamodb_client = boto3.client('dynamodb')
 
-def auth_check(func):
-    @wraps(func)
-    def wrapper(event, context, *args, **kwargs):
-        if 'requestContext' not in event or 'authorizer' not in event['requestContext']:
-            return {
-                'statusCode': 400,
-                'body': 'Bad Request: Missing request context or authorizer'
-            }
-        
-        if 'jwt' not in event['requestContext']['authorizer'] or 'claims' not in event['requestContext']['authorizer']['jwt']:
-            return {
-                'statusCode': 400,
-                'body': 'Bad Request: Missing JWT claims'
-            }
-        
-        user_claims = event['requestContext']['authorizer']['jwt']['claims']
-        if not user_claims or 'sub' not in user_claims:
-            return {
-                'statusCode': 401,
-                'body': 'Unauthorized'
-            }
-        
-        return func(event, context, *args, **kwargs)
-    return wrapper
-
 @auth_check
 def lambda_handler(event, context):
-    """
-    Lambda function to handle file uploads.
-    """
-    
+    # Get claims for the authenticated user
     user_claims = event['requestContext']['authorizer']['jwt']['claims']
     sub = user_claims['sub']
 

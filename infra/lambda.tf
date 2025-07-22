@@ -7,7 +7,10 @@ module "lambda_function_create_claim" {
   handler       = "create_claim.lambda_handler"
   runtime       = "python3.13"
 
-  source_path = "../backend/create_claim"
+  source_path = [
+    "../backend/create_claim",
+    "../backend/auth_check",
+  ]
 
   tags = local.tags
 
@@ -65,7 +68,10 @@ module "lambda_function_get_claims" {
   handler       = "get_claims.lambda_handler"
   runtime       = "python3.13"
 
-  source_path = "../backend/get_claims"
+  source_path = [
+    "../backend/get_claims",
+    "../backend/auth_check",
+  ]
 
   tags = local.tags
 
