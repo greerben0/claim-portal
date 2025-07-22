@@ -81,6 +81,7 @@ def get_claims(user_id, startKey = None):
         {
             'claim_id': item.get('claim_id', {}).get('S', ''),
             'filename': item.get('filename', {}).get('S', ''),
+            'client': item.get('client', {}).get('S', ''),
             'created_at': item.get('created_at', {}).get('S', ''),
             'tags': item.get('tags', {}).get('SS', [])
         } for item in response.get('Items', [])

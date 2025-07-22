@@ -7,6 +7,7 @@ import uuid
 
 from unittest import mock
 import base64
+from typing import List
 
 from create_claim.create_claim import lambda_handler, create_claim
 
@@ -60,6 +61,7 @@ def test_handler(monkeypatch):
     input_file = ""
     expected_filename = 'filename.txt'
     expected_tags = ['tag1', 'tag2']
+    expected_client = 'Client123'
     event = {
         'requestContext': {
             'authorizer': {
@@ -73,14 +75,16 @@ def test_handler(monkeypatch):
         'body': json.dumps({
             'file_base64': input_file,
             'filename': expected_filename,
+            'client': expected_client,
             'tags': expected_tags
         })
     }
      
-    def mock_create_claim(claim_id, sub, file, filename, tags): 
-       assert sub == expected_sub
+    def mock_create_claim(claim_id: str, user_id: str, file: str, filename: str, client: str, tags: List[str]):
+       assert user_id == expected_sub
        assert file
        assert filename == expected_filename
+       assert client == expected_client
        assert tags == expected_tags
     
     monkeypatch.setattr("create_claim.create_claim.create_claim", mock_create_claim)
@@ -91,6 +95,7 @@ def test_handler(monkeypatch):
     monkeypatch.setattr("base64.b64decode", mock_decode)
 
     response = lambda_handler(event, {})
+    assert response['body'].startswith('Claim received')
     assert response['statusCode'] == 200
 
 def test_handler_bad_filename():
@@ -189,6 +194,7 @@ def test_create_claim_stored_under_user_sub(monkeypatch):
     claim_id = str(uuid.uuid4())
     filename = 'test.txt'
     file_contents = ''
+    client = 'Reckless Ron'
 
     # Patch S3 and DynamoDB clients
     mock_s3 = mock.Mock()
@@ -202,6 +208,7 @@ def test_create_claim_stored_under_user_sub(monkeypatch):
         user_id=user_sub,
         file=file_contents,
         filename=filename,
+        client=client,
         tags=['tag1']
     )
 
@@ -219,5 +226,6 @@ def test_create_claim_stored_under_user_sub(monkeypatch):
     assert item["user_id"]["S"] == user_sub
     assert item["claim_id"]["S"] == claim_id
     assert item["filename"]["S"] == filename
+    assert item['client']["S"] == client
 
 

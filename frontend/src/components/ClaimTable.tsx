@@ -56,6 +56,13 @@ export default function ClaimTable({ claims, loading, triggerRefresh }: ClaimTab
                     isRowHeader: true
                 },
                 {
+                    id: "client",
+                    header: "Client",
+                    cell: item => item.client,
+                    sortingField: "client",
+                    isRowHeader: true
+                },
+                {
                     id: "tags",
                     header: "Tags",
                     cell: item => {

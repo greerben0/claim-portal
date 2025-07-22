@@ -5,6 +5,7 @@ import json
 import uuid
 import datetime
 from functools import wraps
+from typing import List
 
 FILE_S3_BUCKET_NAME = os.environ.get('FILE_S3_BUCKET_NAME')
 FILE_METADATA_TABLE_NAME = os.environ.get('FILE_METADATA_TABLE_NAME')
@@ -66,12 +67,14 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': f'Error decoding file {str(e)}'
         }
+    
     filename = body.get('filename', '')
     tags = body.get('tags', [])
+    client = body.get('client', '')
     claim_id = str(uuid.uuid4())
 
     try:
-        create_claim(claim_id, sub, file, filename, tags)
+        create_claim(claim_id, sub, file, filename, client, tags)
     except Exception as e:
        print(str(e))
        return {
@@ -89,7 +92,7 @@ def lambda_handler(event, context):
     return response
 
 
-def create_claim(claim_id, user_id, file, filename, tags):
+def create_claim(claim_id: str, user_id: str, file: str, filename: str, client: str, tags: List[str]):
 
     keypath = f'{user_id}/{claim_id}/{filename}'
     s3_client.put_object(
@@ -107,6 +110,7 @@ def create_claim(claim_id, user_id, file, filename, tags):
             'claim_id': {'S': claim_id},
             'user_id': {'S': user_id},
             'filename': {'S': filename},
+            'client': {'S': client},
             'created_at': {'S': iso_utc},
             'tags': {'SS': tags},
         }

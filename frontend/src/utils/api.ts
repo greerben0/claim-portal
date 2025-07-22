@@ -19,12 +19,13 @@ export async function getClaims(access_token: string) {
   return response;
 }
 
-export async function uploadFile(access_token: string, file: File, tags: string[]) {
+export async function createClaim(access_token: string, client: string, file: File, tags: string[]) {
   if (!access_token)
     throw new Error('Unauthenticated')
   
   const base64Content = await fileToBase64(file);
   const body = {
+    client: client,
     filename: file.name,
     file_base64: base64Content,
     tags: tags,

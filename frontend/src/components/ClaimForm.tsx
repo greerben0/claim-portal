@@ -10,7 +10,7 @@ import FileUpload from "@cloudscape-design/components/file-upload";
 import Multiselect from "@cloudscape-design/components/multiselect";
 import Input from "@cloudscape-design/components/input";
 
-import { uploadFile } from "../utils/api";
+import { createClaim } from "../utils/api";
 import { fetchAuthSession } from '@aws-amplify/auth';
 
 
@@ -27,6 +27,7 @@ interface ClaimFormProps {
 const ClaimForm = ({ submitHandler }: ClaimFormProps) => {
     const [file, setFile] = useState<File[]>([]);
     const [selectedTags, setSelectedTags] = useState<MultiselectProps.Option[]>([]);
+    const [client, setClient] = useState('');
     const [newTag, setNewTag] = useState('');
     const [errorText, setErrorText] = useState('')
 
@@ -39,10 +40,10 @@ const ClaimForm = ({ submitHandler }: ClaimFormProps) => {
             .then((session) => {
                 const accessToken = session.tokens?.accessToken?.toString()
 
-                uploadFile(accessToken || '', file[0], selectedTagsStr)
+                createClaim(accessToken || '', client, file[0], selectedTagsStr)
                     .then(() => submitHandler())
                     .then(() => clearInputs())
-                    .catch(({ message }) => {
+                    .catch(({ message }: { message: string }) => {
                         setErrorText(message)
                     })
             })
@@ -51,6 +52,7 @@ const ClaimForm = ({ submitHandler }: ClaimFormProps) => {
     const clearInputs = async () => {
         setFile([])
         setSelectedTags([])
+        setClient('')
         setNewTag('')
         setErrorText('')
     }
@@ -88,7 +90,7 @@ const ClaimForm = ({ submitHandler }: ClaimFormProps) => {
                     header={<Header variant="h1">Create Claim</Header>}
                     errorText={errorText}
                 >
-                    <SpaceBetween direction="horizontal" size="l">
+                    <SpaceBetween direction="horizontal" size="xl">
                         <FormField label="Claim File" stretch>
                             <FileUpload
                                 onChange={({ detail }) => setFile(detail.value)}
@@ -97,7 +99,14 @@ const ClaimForm = ({ submitHandler }: ClaimFormProps) => {
                                 accept="txt"
                                 showFileLastModified
                                 tokenLimit={50}
-                                constraintText="Hint text for file requirements"
+                                constraintText="Text claim files only"
+                            />
+                        </FormField>
+                        <FormField label="Client" stretch>
+                            <Input
+                                onChange={({ detail }) => setClient(detail.value)}
+                                value={client}
+                                placeholder="Enter Client Information"
                             />
                         </FormField>
                         <SpaceBetween size="s" direction="horizontal">
