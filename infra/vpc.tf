@@ -2,22 +2,19 @@
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
+  version = "5.21.0"
 
   name = local.name
   cidr = "10.10.0.0/16"
 
   azs           = ["us-east-1a", "us-east-1b", "us-east-1c"]
   intra_subnets = ["10.10.101.0/24", "10.10.102.0/24", "10.10.103.0/24"]
-
-  # Add public_subnets and NAT Gateway to allow access to internet from Lambda
-  # public_subnets  = ["10.10.1.0/24", "10.10.2.0/24", "10.10.3.0/24"]
-  # enable_nat_gateway = true
 }
 
 module "vpc_endpoints" {
   source = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
-
+  version = "6.0.1"
+  
   vpc_id = module.vpc.vpc_id
 
   create_security_group      = true
@@ -31,14 +28,6 @@ module "vpc_endpoints" {
   }
 
   endpoints = {
-    # s3 = {
-    #   service             = "s3"
-    #   private_dns_enabled = true
-    #   dns_options = {
-    #     private_dns_only_for_inbound_resolver_endpoint = false
-    #   }
-    #   tags = { Name = "s3-vpc-endpoint" }
-    # },
     s3 = {
       service         = "s3"
       service_type    = "Gateway"
@@ -141,7 +130,7 @@ data "aws_iam_policy_document" "dynamodb_endpoint_policy" {
 
 module "security_group_lambda" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "~> 4.0"
+  version = "4.17.2"
 
   name        = local.name
   description = "Security Group for Lambda Egress"

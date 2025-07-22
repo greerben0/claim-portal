@@ -49,6 +49,7 @@ locals {
 
 module "claims_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
+  version = "5.2.0"
 
   bucket = "${local.name}-claims"
   acl    = "private"
@@ -63,6 +64,8 @@ module "claims_bucket" {
 
 module "claims_table" {
   source = "terraform-aws-modules/dynamodb-table/aws"
+  version = "5.0.0"
+
 
   name         = "${local.name}-claims"
   billing_mode = "PAY_PER_REQUEST"
