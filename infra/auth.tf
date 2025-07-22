@@ -1,17 +1,3 @@
-
-locals {
-  deployed_callback_urls = [
-    "https://${aws_cloudfront_distribution.s3_distribution.domain_name}"
-  ]
-
-  local_callback_urls = [
-    "http://localhost:5173"
-  ]
-
-  callback_urls = var.local ? concat(local.deployed_callback_urls, local.local_callback_urls) : local.deployed_callback_urls
-
-  logout_urls = local.callback_urls
-}
 resource "aws_cognito_user_pool" "pool" {
   name = local.name
   tags = local.tags

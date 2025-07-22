@@ -2,7 +2,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-
 resource "random_string" "uuid" {
   length  = 8
   special = false
@@ -17,8 +16,34 @@ locals {
   tags = {
     Project = local.name
   }
+  deployed_callback_urls = [
+    "https://${aws_cloudfront_distribution.s3_distribution.domain_name}"
+  ]
+
+  local_callback_urls = [
+    "http://localhost:5173"
+  ]
+
+  callback_urls = var.local ? concat(local.deployed_callback_urls, local.local_callback_urls) : local.deployed_callback_urls
+
+  logout_urls = local.callback_urls
 
   s3_origin_id = "${local.name}S3Origin"
+
+  deployed_origins = [
+    "https://${aws_cloudfront_distribution.s3_distribution.domain_name}",
+    "https://${aws_s3_bucket.frontend.bucket_regional_domain_name}",
+  ]
+
+  allowed_origins = var.local ? concat(local.deployed_origins, ["http://localhost:5173"]) : local.deployed_origins
+
+  vite_env_content = templatefile("${path.module}/env.tftpl", {
+    user_pool_region    = local.region,
+    user_pool_name      = aws_cognito_user_pool.pool.name
+    user_pool_id        = aws_cognito_user_pool.pool.id
+    user_pool_client_id = aws_cognito_user_pool_client.client.id
+    backend_domain      = aws_apigatewayv2_stage.claim_portal.invoke_url
+  })
 }
 
 
@@ -53,4 +78,9 @@ module "claims_table" {
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
   tags = local.tags
+}
+
+resource "local_file" "vite_env_file" {
+  content  = local.vite_env_content
+  filename = "${path.module}/../frontend/.env"
 }
