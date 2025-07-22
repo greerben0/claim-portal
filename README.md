@@ -21,6 +21,7 @@ This will automatically create the .env file for the frontend
 
 ### 3. Build Webapp
 `npm -prefix frontend i`
+
 `npm -prefix frontend run build`
 
 ### 4. Deploy Webapp
@@ -31,8 +32,6 @@ Use the `webapp_deploy_command` output from terraform
 ### 5. Interact with deployed Claim Portal
 
 Navigate to the cloudfront endpoint
-
-
 
 # Backend
 
