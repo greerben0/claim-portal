@@ -9,6 +9,8 @@ from unittest import mock
 import base64
 from typing import List
 
+from auth_check.auth_check import auth_check
+
 from create_claim.create_claim import lambda_handler, create_claim
 
 def test_handler(monkeypatch):
@@ -49,11 +51,13 @@ def test_handler(monkeypatch):
     
     monkeypatch.setattr("base64.b64decode", mock_decode)
 
+    monkeypatch.setattr("auth_check.auth_check", auth_check)
+
     response = lambda_handler(event, {})
     assert response['body'].startswith('Claim received')
     assert response['statusCode'] == 200
 
-def test_handler_bad_filename():
+def test_handler_bad_filename(monkeypatch):
     expected_sub = 'abc-123'
     expected_file = base64.b64encode("test".encode('utf-8'))
     expected_filename = 'filename'
@@ -75,12 +79,15 @@ def test_handler_bad_filename():
         })
     }
 
+    monkeypatch.setattr("auth_check.auth_check", auth_check)
+
+
     response = lambda_handler(event, {})
 
     assert response['statusCode'] == 400
 
 
-def test_handler_bad_file():
+def test_handler_bad_file(monkeypatch):
     expected_sub = 'abc-123'
     expected_file = ""
     expected_filename = 'filename.txt'
@@ -101,6 +108,8 @@ def test_handler_bad_file():
             'tags': expected_tags
         })
     }
+
+    monkeypatch.setattr("auth_check.auth_check", auth_check)
 
     response = lambda_handler(event, {})
 
@@ -133,6 +142,8 @@ def test_handler_error_creating_claim(monkeypatch):
     
     monkeypatch.setattr("create_claim.create_claim.create_claim", mock_create_claim)
     
+    monkeypatch.setattr("auth_check.auth_check", auth_check)
+
     response = lambda_handler(event, {})
 
     assert response['statusCode'] == 500

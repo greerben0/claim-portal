@@ -5,7 +5,7 @@ import json
 import uuid
 import datetime
 from typing import List
-from auth_check import auth_check # this matches the deployed lambda path
+from auth_check.auth_check import auth_check # this matches the deployed lambda path
 
 FILE_S3_BUCKET_NAME = os.environ.get('FILE_S3_BUCKET_NAME')
 FILE_METADATA_TABLE_NAME = os.environ.get('FILE_METADATA_TABLE_NAME')

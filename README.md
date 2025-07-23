@@ -37,6 +37,24 @@ Navigate to the cloudfront endpoint
 
 Python lambdas to handle uploading and retrieving claims
 
+## Tests
+
+Intended to be executed from within `backend/` directory with Python 3.13.5
+
+1. Create Python virtual environment
+
+`python -m venv .venv`
+
+`.venv/bin/activate`
+
+2. Install requirements 
+
+`pip install -r requirements.txt`
+
+3. Run tests
+
+`pytest --cov --cov-report term-missing tests/ `
+
 # Frontend
 
 Vite React Typescript 
